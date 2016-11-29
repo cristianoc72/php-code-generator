@@ -9,9 +9,9 @@ use gossi\codegen\tests\parts\ValueTests;
  * @group model
  */
 class ParameterTest extends \PHPUnit_Framework_TestCase {
-	
+
 	use ValueTests;
-	
+
 	public function testByReference() {
 		$param = new PhpParameter();
 		$this->assertFalse($param->isPassedByReference());
@@ -49,6 +49,19 @@ class ParameterTest extends \PHPUnit_Framework_TestCase {
 		$this->assertNull($param2->getValue());
 	}
 
+	public function testSimpleParameterWithArrayDefaultValue()
+    {
+    	$function = new PhpFunction();
+		$function->addSimpleParameter('param1', 'array', array('foo' => 'bar', 'foobaz' => 'barbaz'));
+
+		$this->assertTrue($function->hasParameter('param1'));
+		$param1 = $function->getParameter('param1');
+		$this->assertEquals('array', $param1->getType());
+		$this->assertTrue($param1->hasValue());
+		$this->assertTrue(is_string($param1->getExpression()));
+		$this->assertEquals('[\'foo\' => \'bar\', \'foobaz\' => \'barbaz\']', $param1->getExpression());
+	}
+
 	public function testSimpleDescParameter() {
 		$function = new PhpFunction();
 		$function->addSimpleDescParameter('param1', 'string');
@@ -72,7 +85,21 @@ class ParameterTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('string', $param3->getType());
 		$this->assertNull($param3->getValue());
 	}
-	
+
+	public function testSimpleDescParameterWithArrayDefaultValue()
+	{
+		$function = new PhpFunction();
+		$function->addSimpleDescParameter('param1', 'array', 'desc', array(1, 2, 3));
+
+		$this->assertTrue($function->hasParameter('param1'));
+		$param1 = $function->getParameter('param1');
+		$this->assertEquals('array', $param1->getType());
+		$this->assertEquals('desc', $param1->getDescription());
+		$this->assertTrue($param1->hasValue());
+		$this->assertTrue(is_string($param1->getExpression()));
+		$this->assertEquals('[1, 2, 3]', $param1->getExpression());
+	}
+
 	public function testValues() {
 		$this->isValueString(PhpParameter::create()->setValue('hello'));
 		$this->isValueInteger(PhpParameter::create()->setValue(2));

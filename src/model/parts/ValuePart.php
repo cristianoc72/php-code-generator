@@ -56,10 +56,10 @@ trait ValuePart {
 	public function hasDefaultValue() {
 		return $this->hasValue();
 	}
-	
+
 	/**
 	 * Returns whether the given value is a primitive
-	 * 
+	 *
 	 * @param mixed $value
 	 * @return boolean
 	 */
@@ -135,6 +135,14 @@ trait ValuePart {
 	 * @return $this
 	 */
 	public function setExpression($expr) {
+		if (is_array($expr)) {
+			if (count(array_filter(array_keys($expr), 'is_string')) > 0) {
+				//Associative array
+				$expr = str_replace(["\n", "array (  ", ",)", "  "], ["", "[", "]", " "], var_export($expr, true));
+			} else {
+				$expr = '[' . implode(', ', $expr) . ']';
+			}
+		}
 		$this->expression = $expr;
 		$this->hasExpression = true;
 

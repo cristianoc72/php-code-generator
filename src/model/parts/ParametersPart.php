@@ -1,6 +1,7 @@
 <?php
 namespace gossi\codegen\model\parts;
 
+use gossi\codegen\model\PhpConstant;
 use gossi\codegen\model\PhpParameter;
 use gossi\docblock\tags\ParamTag;
 
@@ -15,14 +16,14 @@ trait ParametersPart {
 
 	/** @var array */
 	private $parameters = [];
-	
+
 	private function initParameters() {
 // 		$this->parameters = new ArrayList();
 	}
 
 	/**
 	 * Sets a collection of parameters
-	 * 
+	 *
 	 * Note: clears all parameters before setting the new ones
 	 *
 	 * @param PhpParameter[] $parameters
@@ -61,7 +62,7 @@ trait ParametersPart {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -79,7 +80,12 @@ trait ParametersPart {
 		$parameter->setType($type);
 
 		if (2 < func_num_args()) {
-			$parameter->setValue($defaultValue);
+			if (is_string($defaultValue) || is_int($defaultValue) || is_float($defaultValue) || is_bool($defaultValue)
+				|| is_null($defaultValue) || $defaultValue instanceof PhpConstant) {
+				$parameter->setValue($defaultValue);
+			} else {
+				$parameter->setExpression($defaultValue);
+			}
 		}
 
 		$this->addParameter($parameter);
@@ -102,7 +108,12 @@ trait ParametersPart {
 		$parameter->setTypeDescription($typeDescription);
 
 		if (3 < func_num_args() == 3) {
-			$parameter->setValue($defaultValue);
+			if (is_string($defaultValue) || is_int($defaultValue) || is_float($defaultValue) || is_bool($defaultValue)
+				|| is_null($defaultValue) || $defaultValue instanceof PhpConstant) {
+				$parameter->setValue($defaultValue);
+			} else {
+				$parameter->setExpression($defaultValue);
+			}
 		}
 
 		$this->addParameter($parameter);
@@ -163,13 +174,13 @@ trait ParametersPart {
 
 		return $this;
 	}
-	
+
 	private function removeParameterByPosition($position) {
 		$this->checkPosition($position);
 		unset($this->parameters[$position]);
 		$this->parameters = array_values($this->parameters);
 	}
-	
+
 	private function removeParameterByName($name) {
 		$position = null;
 		foreach ($this->parameters as $index => $param) {
@@ -177,12 +188,12 @@ trait ParametersPart {
 				$position = $index;
 			}
 		}
-		
+
 		if ($position !== null) {
 			$this->removeParameterByPosition($position);
 		}
 	}
-	
+
 	private function checkPosition($position) {
 		if ($position < 0 || $position > count($this->parameters)) {
 			throw new \InvalidArgumentException(sprintf('The position must be in the range [0, %d].', count($this->parameters)));
